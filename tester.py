@@ -5,21 +5,20 @@ from urllib2 import urlopen
 
 
 
-'''
+
 #getting an article from the list
-get = urlopen("https://news.virginia.edu/content/all-news?page=534")
+get = urlopen("https://news.virginia.edu/content/all-news?page=0")
 html = get.read()
 
 soup = BeautifulSoup(html, 'html.parser')
 list_of_articles = soup.find_all("div", class_ = "uva-today-news-item-title")
-print list_of_articles
 
-#print list_of_articles[0].a['href']
-#print list_of_articles[0].a.contents[0]
+print list_of_articles[0].a['href']
+print list_of_articles[0].a.contents[0]
 
-#print soup'''
+#print soup
 
-'''
+'''=
 #text
 get = urlopen("https://news.virginia.edu/content/el-nino-and-its-high-temps-are-back-already-hot-world-what-does-it-mean")
 html = get.read()
@@ -66,8 +65,36 @@ soup = BeautifulSoup(html, 'html.parser')
 category= soup.find("meta", property = "og:type")['content']
 print category'''
 
-#author
-#changes based on the version, need to make two different ones
+#author and email
+#newer version
+'''get = urlopen("https://news.virginia.edu/content/professors-invention-helping-make-your-fruits-and-vegetables-safer-eat")
+html = get.read()
+
+soup = BeautifulSoup(html, 'html.parser')
+author_email_tag= soup.find("li", class_ = "author list").find_all("a")
+author = author_email_tag[0].string
+email = author_email_tag[1].string
+
+print author
+print email'''
+
+
+#older version
+'''get = urlopen("https://news.virginia.edu/content/professors-invention-helping-make-your-fruits-and-vegetables-safer-eat")
+html = get.read()
+
+
+
+soup = BeautifulSoup(html, 'html.parser')
+author_email_tag= soup.find("li", class_ = "author").find_all("a")
+author = author_email_tag[0].string
+email = author_email_tag[1].string
+
+print author
+print email'''
+
+
+
 
 #email - same as author
 
@@ -83,11 +110,11 @@ print date'''
 #link - from list
 
 #title
-get = urlopen("https://news.virginia.edu/content/uva-marshall-scholar-kristen-barrett-explore-literature-film")
+'''get = urlopen("https://news.virginia.edu/content/uva-marshall-scholar-kristen-barrett-explore-literature-film")
 html = get.read()
 
 soup = BeautifulSoup(html, 'html.parser')
 title= soup.find("meta", property = "og:title")['content']
-print title
+print title'''
 
 

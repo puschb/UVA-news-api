@@ -26,20 +26,58 @@ class UVANewsArticle():
                     self.postDate,self.postLink, self.postText, self.postCategory)
     
 
-class scrapeUVANews:
+class UVANewsArticleBuilder():
+
+    def buil
+    
+
+class ScrapeUVANews:
     css_classifier_body_p = "paragraphs-item-body-text"
     css_classifier_intro_p = "paragraphs-item-intro-text"
+    article_list_link = "https://news.virginia.edu/content/all-news?page={}"
 
-    def get():
+    def getAll(self):
+        page_num = 0
+
+        UVANewsArticles = []
+        
+        finishedScraping = False
+
+        while(not finishedScraping):
+            list_of_articles = self.__getArticles(self.article_list_link.format(page_num))
+            print list_of_articles
         
 
-'''example = UVANewsArticle()
-example.postId = "1"
-example.postAuthor = "Ben Pusch"
-example.postEmail = "bhx5gh@virginia.edu"
-example.postDate = "6/23/23"
-example.postLink = "www.example.com"
-example.postText = "This article is awesome"
-example.postCategory = "Business"
+    def getRecent(self,num):
+        pass
 
-print example'''
+    def getByDate(self, date):
+        pass
+    def getByAuthor(self, author):
+        pass
+
+    def getByCategory(self, category):
+        pass
+
+    def __getArticles(self,link):
+        root_link = "https://news.virginia.edu"
+        get = urlopen(link)
+        html = get.read()
+        soup = BeautifulSoup(html, 'html.parser')
+        list_of_articles = soup.find_all("div", class_ = "uva-today-news-item-title")
+
+        article_links = []
+
+        for article_link in list_of_articles:
+            article_links.append(root_link + article_link.a['href'])
+        
+        return article_links
+
+    def __
+
+    def __getText(self,html):
+        pass
+        
+
+scraper = ScrapeUVANews()
+scraper.getAll()
