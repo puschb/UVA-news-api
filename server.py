@@ -52,30 +52,22 @@ class UVANewsArticleBuilder():
     @staticmethod
     def __getAuthor(soup,link):
         did_exception_happen = 0
-        
-
-        #stopped here
-
-        author_email_tag = soup.find("li", class_ = "author list").find_all("a") #new web page version
-        if author_email_tag == None:
-            author_email_tag= soup.find("li", class_ = "author").find_all("a") #old web page version
-        if author_email_tag == None:
+        author = None
+        try:
+            author_email_tag = soup.find("li", class_ = "author list") or soup.find("li", class_ = "author")
+            author = author_email_tag.find_all("a")[0].string
+        except:
             did_exception_happen = 1
-        else:
-            author = author_email_tag[0].string
         return author, did_exception_happen
     
     @staticmethod
     def __getEmail(soup):
         did_exception_happen = 0
+        email = None
         try:
-            author_email_tag= soup.find("li", class_ = "author list").find_all("a")
-            email = author_email_tag[1].string
-        except AttributeError:
-            author_email_tag= soup.find("li", class_ = "author").find_all("a")
-            email = author_email_tag[1].string
+            author_email_tag = soup.find("li", class_ = "author list") or soup.find("li", class_ = "author")
+            email = author_email_tag.find_all("a")[1].string
         except:
-            email = None
             did_exception_happen = 1
         return email, did_exception_happen
 
@@ -154,11 +146,13 @@ class ScrapeUVANews:
         all_articles = []
         total_exceptions = 0
 
-        while(not finishedScraping):
+        #while(not finishedScraping):
+        for i in range(30):
             for article_link in list_of_articles:
                 built_article, num_exceptions = UVANewsArticleBuilder.buildArticle(article_link)
                 total_exceptions += num_exceptions
                 all_articles.append(built_article)
+            print(i)
             
             page_num += 1
             list_of_articles = self.__getArticles(self.article_list_link.format(page_num))
