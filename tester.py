@@ -1,120 +1,34 @@
-from bs4 import BeautifulSoup
+import grequests
 from urllib.request import urlopen
+import time
+import asyncio
 
+urls = [
+    'https://news.virginia.edu/content/all-news?page=0',
+    'https://news.virginia.edu/content/all-news?page=1',
+    'https://news.virginia.edu/content/all-news?page=2',
+    'https://news.virginia.edu/content/all-news?page=3',
+    'https://news.virginia.edu/content/all-news?page=4',
+    'https://news.virginia.edu/content/all-news?page=5',
+    'https://news.virginia.edu/content/all-news?page=6',
+    'https://news.virginia.edu/content/all-news?page=7',
+    'https://news.virginia.edu/content/all-news?page=8',
+    'https://news.virginia.edu/content/all-news?page=9',
+    'https://news.virginia.edu/content/all-news?page=10',
+    'https://news.virginia.edu/content/all-news?page=11',
+    'https://news.virginia.edu/content/all-news?page=12',
+    'https://news.virginia.edu/content/all-news?page=13',
+    'https://news.virginia.edu/content/all-news?page=14',
+    'https://news.virginia.edu/content/all-news?page=15'
+]
+print(time.perf_counter())
+rs = (grequests.get(u) for u in urls)
 
+list_of_responses = grequests.map(rs)
 
+print("here")
+print(time.perf_counter())
 
-
-#getting an article from the list
-'''get = urlopen("https://news.virginia.edu/content/all-news?page=0")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-list_of_articles = soup.find_all("div", class_ = "uva-today-news-item-title")
-
-print list_of_articles[0].a['href']
-print list_of_articles[0].a.contents[0]'''
-
-#print soup
-
-
-#text
-get = urlopen("https://news.virginia.edu/content/el-nino-and-its-high-temps-are-back-already-hot-world-what-does-it-mean")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-
-intro = soup.find("div", class_ = "paragraphs-item-intro-text")
-body = soup.find_all("div", class_ = "paragraphs-item-body-text")
-
-text = u""
-for p in intro.find_all("p"):
-    if p.string != None:
-        print(type(p.string))
-        text += p.string + u'\n\n'
-    else:
-        for s in p.stripped_strings:
-            text += s
-        text += u'\n\n'
-
-
-
-for b in body:
-    for p in b.find_all("p"):
-        if p.string != None:
-            print(type(p.string))
-            text += p.string + u'\n\n'
-        else:
-            for s in p.stripped_strings:
-                text += s
-            text += u'\n\n'
-
-
-print(text)
-
-
-
-
-
-
-'''#category
-get = urlopen("https://news.virginia.edu/content/uva-marshall-scholar-kristen-barrett-explore-literature-film")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-category= soup.find("meta", property = "og:type")['content']
-print category'''
-
-#author and email
-#newer version
-'''get = urlopen("https://news.virginia.edu/content/professors-invention-helping-make-your-fruits-and-vegetables-safer-eat")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-author_email_tag= soup.find("li", class_ = "author list").find_all("a")
-author = author_email_tag[0].string
-email = author_email_tag[1].string
-
-print author
-print email
-
-
-#older version
-get = urlopen("https://news.virginia.edu/content/professors-invention-helping-make-your-fruits-and-vegetables-safer-eat")
-html = get.read()
-
-
-
-soup = BeautifulSoup(html, 'html.parser')
-author_email_tag= soup.find("li", class_ = "author").find_all("a")
-author = author_email_tag[0].string
-email = author_email_tag[1].string
-
-print author
-print email'''
-
-
-
-
-#email - same as author
-
-#date
-'''get = urlopen("https://news.virginia.edu/content/uva-marshall-scholar-kristen-barrett-explore-literature-film")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-date= soup.find("meta", property = "og:updated_time")['content']
-print date'''
-
-
-#link - from list
-
-#title
-'''get = urlopen("https://news.virginia.edu/content/uva-marshall-scholar-kristen-barrett-explore-literature-film")
-html = get.read()
-
-soup = BeautifulSoup(html, 'html.parser')
-title= soup.find("meta", property = "og:title")['content']
-print title'''
-
+print(list(list_of_responses))
+print(time.perf_counter())
 

@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+import asyncio
+import time
+import httpx
 
 class UVANewsArticle():
     def __init__(self,title, author,email, date, link, text, category):
@@ -27,10 +30,12 @@ class UVANewsArticle():
 class UVANewsArticleBuilder():
 
     @staticmethod
-    def buildArticle(link):
-        get = urlopen(link)
-        html = get.read()
-        soup = BeautifulSoup(html, 'html.parser', from_encoding='utf-8')
+    async def buildArticle(link, built_articles_list, client):
+        '''async with httpx.AsyncClient() as client:
+            response = await client.get(link)'''
+        response = await client.get(link)
+        html = response.text
+        soup = BeautifulSoup(html, 'html.parser')
         num_exceptions = 0
 
         author, exception = UVANewsArticleBuilder.__getAuthor(soup,link)
@@ -46,8 +51,11 @@ class UVANewsArticleBuilder():
         category, exception = UVANewsArticleBuilder.__getCategory(soup)
         num_exceptions += exception
 
-        return UVANewsArticle(author=author,email=email,date=date, link=link, 
-                              title=title, text=text,category= category), num_exceptions
+        built_articles_list.append(UVANewsArticle(author=author,email=email,date=date, link=link, 
+                                    title=title, text=text,category= category))
+
+        #return UVANewsArticle(author=author,email=email,date=date, link=link, 
+        #                      title=title, text=text,category= category)#, num_exceptions
 
     @staticmethod
     def __getAuthor(soup,link):
@@ -132,51 +140,72 @@ class UVANewsArticleBuilder():
         return category, did_exception_happen
     
 
+    
+
 class ScrapeUVANews:
     css_classifier_body_p = "paragraphs-item-body-text"
     css_classifier_intro_p = "paragraphs-item-intro-text"
-    article_list_link = "https://news.virginia.edu/content/all-news?page={}"
+    uva_news_default_link = "https://news.virginia.edu/content/all-news?page={}"
+    counter = 1
 
-    def getAll(self):
-        page_num = 0
+    #hardcoded for now, will change
+    final_page = 534
 
-        finishedScraping = False
-        list_of_articles = self.__getArticles(self.article_list_link.format(page_num))
+    async def getAll(self):
+        t1 = time.perf_counter()
+        page_num = self.final_page
+        uva_all_news_links = [self.uva_news_default_link.format(i) for i in range(534)]
+        
+        all_article_links = []
+        built_articles = []
+        async with httpx.AsyncClient(timeout=None) as client:
+            await asyncio.gather(*[self.__getArticles(page,all_article_links,client) for page in uva_all_news_links])
 
-        all_articles = []
+            await asyncio.gather(*[UVANewsArticleBuilder.buildArticle(link, built_articles, client) for link in all_article_links])
+
+
+
+
+
+        '''finishedScraping = False
+        list_of_articles = self.__getArticles(self.uva_news_default_link.format(page_num))
+
+        
         total_exceptions = 0
 
-        #while(not finishedScraping):
-        for i in range(30):
+        while((not list_of_articles == None) and len(list_of_articles > 0)):
+            
+
             for article_link in list_of_articles:
                 built_article, num_exceptions = UVANewsArticleBuilder.buildArticle(article_link)
                 total_exceptions += num_exceptions
-                all_articles.append(built_article)
+                uva_all_news_links.append(built_article)
             print(i)
             
             page_num += 1
-            list_of_articles = self.__getArticles(self.article_list_link.format(page_num))
-            if list_of_articles == None or len(list_of_articles) == 0:
-                finishedScraping = True
+            list_of_articles = self.__getArticles(self.uva_news_default_link.format(page_num))'''
 
-        print(self.commandLineReturnArticles(all_articles))
-        print(f"number of exceptions while scraping: {num_exceptions}")
-        
-        
+        #print(self.commandLineReturnArticles(built_articles))
+        #print(f"number of exceptions while scraping: {num_exceptions}")
+        print(f'done\n#articles = {len(all_article_links)}\ntime: {time.perf_counter()-t1}')
 
-    def __getArticles(self,link):
+     
+        
+    
+    
+    async def __getArticles(self,link, all_articles,client):
+        self.counter += 1
         root_link = "https://news.virginia.edu"
-        get = urlopen(link)
-        html = get.read()
+        '''async with httpx.AsyncClient() as client:
+            response = await client.get(link)'''
+        response = await client.get(link)
+        html = response.text
         soup = BeautifulSoup(html, 'html.parser')
         list_of_articles = soup.find_all("div", class_ = "uva-today-news-item-title")
 
-        article_links = []
-
         for article_link in list_of_articles:
-            article_links.append(root_link + article_link.a['href'])
+            all_articles.append(root_link + article_link.a['href'])
         
-        return article_links
     
     def commandLineReturnArticles(self, list_of_articles):
         list_to_str = u'{\n"posts": ['
@@ -187,10 +216,16 @@ class ScrapeUVANews:
                 list_to_str += str(article) + '\n]\n}'
 
         return list_to_str
+    
+
+
+
+scraper = ScrapeUVANews()
+asyncio.run(scraper.getAll())
+#scraper.simpleTest2()
 
     
         
 
-scraper = ScrapeUVANews()
-scraper.getAll()
+
 #output_json = 
