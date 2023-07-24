@@ -1,0 +1,28 @@
+async
+- if you are trying to do a lot of requests asyncronously, you will quickly run into hardware bottlenecks 
+- technically you have access to ~65k tcp ports but windows limits you to around 1k (as I understand it)
+  - aiohttp defaults to 100 connections per session, which you can increase to 1000 using the limit parameter (async with ClientSession(connector=aiohttp.TCPConnector(limit=1000),trust_env=True) as session:)
+  - as redundancy use the semaphore feature from asyncio in your context manager
+    - async with semaphore, session.get(url) as response:
+        return await response.text()
+- async requust libraries are not made equally, some are faster than others, the fastest one i found is aiohttp
+
+scraping
+- in general directly scraping a website is pretty slow, check if they have some sort of search functionality, in which case 
+  they are probably calling an api. You can mimic the website's api call by using the dev tools (network tab - just gotta find the right one)
+  - if you do manage to find an api, if the website is using some company's cloud infrastructure, read through their docs first because you can probably
+    tailor your request to better suit your needs
+  - using selenium is a last resort, it is very slow. If a website is loading information dynamically, find the source where it is coming from in teh 
+    network tab and use the convenient search feature. This may not be possible but try it first because it is a hell of a lot faster than using a headless browser
+
+html parsing
+- BeautifulSoup is useful but slow, you can make it faster by using the lxml parser instead of the default html.parser (that one is increadibly slow)
+- however best case senario you just completely avoid it, or use lxml directly 
+- ideally if your html format is pretty static, use xpaths instead of an html search functionality, this will also speed up parsing
+
+overengineering
+- optimization is key but you can't just throw everything you know at it and expect your program to run better.
+  I tried to combine multithreading/multiprocessing with the async framework for ages thinking I could overcome the
+  hardware bottleneck I was facing, as far as I can tell you can't (or it would take a ton more effort). What actually 
+  helped me was taking a step back and approaching the problem from a completely different angle. I wish I had done that sooner,
+  don't waste your time and next time spend more time fully understanding the problem space.
