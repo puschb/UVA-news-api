@@ -137,6 +137,10 @@ def __parse_document(document):
     parsed_document['category'] = doc_fields['NewsCategory']['Value']
   except:
     parsed_document['category'] = 'n/a'
+  try:
+    parsed_document['description'] = doc_fields['MetaDescription']['Value']
+  except:
+    parsed_document['description'] = 'n/a'
 
   return parsed_document
 
